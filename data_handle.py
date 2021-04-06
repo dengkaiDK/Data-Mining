@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt 
 from scipy.optimize import curve_fit
 
-strategy = {1:'delete',2:'mode',3:'relation',4:'similarity'}
+strategy = {1:'delete',2:'mode',3:'relation',4:'similarity',5:'relation_airbnb',6:'similarity_airbnb'}
 
 class Data:
     def __init__(self,dataset,data_index,strategy=1):
@@ -63,6 +63,21 @@ class Data:
 
         elif self.strategy == 4:
             array = self.relation(item,index)   # use mean value
+        
+        elif self.strategy == 5:
+            # according to relation coffient, use number_of_reviews to fit reviews_per_month
+            Y = array[np.isnan(array) == False]
+            predict = array[np.isnan(array) == True]
+            X = dataset['number_of_reviews'].values[np.isnan(array) == False]
+            pre_X = dataset['number_of_reviews'].values[np.isnan(array) == True]
+            popt, pcov = curve_fit(self.polyfit,X,Y)
+            #print(*popt)
+            predict = self.polyfit(pre_X,*popt)
+            array[np.isnan(array) == True] = predict
+        
+        elif self.strategy == 6:
+            # after observing nan value in reviews_per_month， almost nan value derives from 0 number_of_reviews
+            array[np.isnan(array) == True] = 0
 
         print('percentile: ',np.percentile(array,[0,25,50,75,100]))
         print('mean value: ',np.mean(array))
@@ -81,8 +96,8 @@ class Data:
         std = np.std(array)
         return mean, std
 
-    def polyfit3(self,x,a,b,c,d):
-        return a + b * x + c * x**2 + d * x**3
+    def polyfit(self,x,a,b):
+        return a + b * x 
 
     def logfit(self,x,a,b):
         return a*np.log(x) + b
