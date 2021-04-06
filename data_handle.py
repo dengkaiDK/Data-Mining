@@ -150,7 +150,6 @@ class Data:
             std = 0
             price_list = []
             point_list = []
-            #print('Country: ',country,'Province: ',province,'Variety: ',variety,'Points: ',points)
             if variety in look_up and country in look_up[variety] and province in look_up[variety][country]:
                 mean, std = self.stat(look_up[variety][country][province][0])
                 price_list.extend(look_up[variety][country][province][0])
@@ -196,12 +195,12 @@ class Data:
                 mean /= normalize
                 std /= normalize
             
-            #sample = np.random.normal(mean,std)
-            #price_array = np.array(price_list)
-            #point_array = np.array(point_list)
-            #popt,pcov = curve_fit(self.expfit,point_array,price_array - sample)
-            #predict[i] = self.expfit(points,*popt) + sample
-            predict[i] = mean
+            sample = np.random.normal(mean,std)
+            price_array = np.array(price_list)
+            point_array = np.array(point_list)
+            popt,pcov = curve_fit(self.expfit,point_array,price_array - sample)
+            predict[i] = self.expfit(points,*popt) + sample
+            #predict[i] = mean
 
         array[row_slice == True] = predict
         return array
